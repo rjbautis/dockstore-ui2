@@ -67,12 +67,12 @@ describe('Verify Title Tags', () => {
   describe('Tools/Workflows', () => {
     it('individual tool', () => {
       cy.visit('/containers/quay.io/garyluu/dockstore-cgpmap/cgpmap-cramOut:3.0.0-rc8?tab=info');
-      cy.title().should('eq', 'Dockstore | Tool');
+      cy.title().should('eq', 'quay.io/garyluu/dockstore-cgpmap/cgpmap-cramOut');
     });
 
     it('individual workflow', () => {
       cy.visit('/workflows/github.com/A/l:master?tab=info');
-      cy.title().should('eq', 'Dockstore | Workflow');
+      cy.title().should('eq', 'github.com/A/l');
     });
 
     it('/tools', () => {
