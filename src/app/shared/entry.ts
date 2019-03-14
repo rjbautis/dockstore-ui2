@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 import { Location } from '@angular/common';
-import { AfterViewInit, Injectable, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Injectable, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChipInputEvent, MatTabChangeEvent } from '@angular/material';
-import { ActivatedRoute, NavigationEnd, Params, Router, RouterEvent } from '@angular/router/';
+import { ActivatedRoute, NavigationEnd, Router, RouterEvent } from '@angular/router/';
 import { TabsetComponent } from 'ngx-bootstrap';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -32,10 +32,11 @@ import { SessionQuery } from './session/session.query';
 import { SessionService } from './session/session.service';
 import { UrlResolverService } from './url-resolver.service';
 import { validationDescriptorPatterns, validationMessages } from './validationMessages.model';
+import { Title } from '@angular/platform-browser';
 
 
 @Injectable()
-export abstract class Entry implements OnInit, OnDestroy, AfterViewInit {
+export abstract class Entry implements OnInit, OnDestroy {
   @ViewChild('entryTabs') entryTabs: TabsetComponent;
   protected shareURL: string;
   public starGazersClicked = false;
@@ -58,6 +59,7 @@ export abstract class Entry implements OnInit, OnDestroy, AfterViewInit {
   @Input() isToolPublic = true;
   public publicPage: boolean;
   public validationMessage = validationMessages;
+  public addedDiscourse = false;
   protected ngUnsubscribe: Subject<{}> = new Subject();
   protected selected = new FormControl(0);
   constructor(private trackLoginService: TrackLoginService,
@@ -67,7 +69,8 @@ export abstract class Entry implements OnInit, OnDestroy, AfterViewInit {
     public urlResolverService: UrlResolverService,
     public activatedRoute: ActivatedRoute,
     public locationService: Location,
-    protected sessionService: SessionService, protected sessionQuery: SessionQuery, protected gA4GHFilesService: GA4GHFilesService) {
+    protected sessionService: SessionService, protected sessionQuery: SessionQuery, protected gA4GHFilesService: GA4GHFilesService,
+    public titleService: Title) {
     this.location = locationService;
     this.gA4GHFilesService.clearFiles();
   }
@@ -163,24 +166,6 @@ export abstract class Entry implements OnInit, OnDestroy, AfterViewInit {
         return version;
       }
     }
-  }
-
-  // Embed Discourse comments into page
-  ngAfterViewInit() {
-    if (this.publicPage) {
-      (function () {
-        const d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
-        d.src = (<any>window).DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
-      })();
-    }
-
-    this.activatedRoute.queryParams.pipe(takeUntil(this.ngUnsubscribe)).subscribe((params: Params) => {
-      const tabIndex = this.validTabs.indexOf(params['tab']);
-      if (tabIndex > -1) {
-        this.currentTab = this.validTabs[tabIndex];
-      }
-    });
   }
 
   /**

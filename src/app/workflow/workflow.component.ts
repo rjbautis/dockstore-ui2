@@ -16,9 +16,9 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component, Input, AfterViewInit } from '@angular/core';
 import { MatChipInputEvent, MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AlertQuery } from '../shared/alert/state/alert.query';
@@ -47,12 +47,14 @@ import { TrackLoginService } from '../shared/track-login.service';
 import { UrlResolverService } from '../shared/url-resolver.service';
 
 import RoleEnum = Permission.RoleEnum;
+import { Title } from '@angular/platform-browser';
+
 @Component({
   selector: 'app-workflow',
   templateUrl: './workflow.component.html',
   styleUrls: ['./workflow.component.css'],
 })
-export class WorkflowComponent extends Entry {
+export class WorkflowComponent extends Entry implements AfterViewInit {
   workflowEditData: any;
   public isRefreshing$: Observable<boolean>;
   public workflow: ExtendedWorkflow;
@@ -86,10 +88,10 @@ export class WorkflowComponent extends Entry {
     router: Router, private workflowService: WorkflowService, private extendedWorkflowQuery: ExtendedWorkflowQuery,
     urlResolverService: UrlResolverService, private alertService: AlertService,
     location: Location, activatedRoute: ActivatedRoute, protected sessionQuery: SessionQuery, protected sessionService: SessionService,
-    gA4GHFilesService: GA4GHFilesService, private workflowQuery: WorkflowQuery, private alertQuery: AlertQuery,
-    private descriptorTypeCompatService: DescriptorTypeCompatService, public dialog: MatDialog) {
+      gA4GHFilesService: GA4GHFilesService, private workflowQuery: WorkflowQuery, private alertQuery: AlertQuery,
+      private descriptorTypeCompatService: DescriptorTypeCompatService, public dialog: MatDialog, titleService: Title) {
     super(trackLoginService, providerService, router,
-      dateService, urlResolverService, activatedRoute, location, sessionService, sessionQuery, gA4GHFilesService);
+      dateService, urlResolverService, activatedRoute, location, sessionService, sessionQuery, gA4GHFilesService, titleService);
     this._toolType = 'workflows';
     this.location = location;
     this.redirectAndCallDiscourse('/my-workflows');
@@ -156,6 +158,31 @@ export class WorkflowComponent extends Entry {
 
   public getDefaultVersionName(): string {
     return this.workflow.defaultVersion;
+  }
+
+  // Embed Discourse comments into page
+  ngAfterViewInit() {
+    if (this.publicPage) {
+      this.workflowQuery.workflow$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
+        workflow => {
+          if (workflow && !this.addedDiscourse) {
+            this.addedDiscourse = true;
+            this.titleService.setTitle(workflow.full_workflow_path);
+            (function() {
+              const d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+              d.src = (<any>window).DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+            })();
+          }
+      });
+    }
+
+    this.activatedRoute.queryParams.pipe(takeUntil(this.ngUnsubscribe)).subscribe((params: Params) => {
+      const tabIndex = this.validTabs.indexOf(params['tab']);
+      if (tabIndex > -1) {
+        this.currentTab = this.validTabs[tabIndex];
+      }
+    });
   }
 
   private setUpWorkflow(workflow: any) {

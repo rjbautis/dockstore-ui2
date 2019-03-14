@@ -16,9 +16,9 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { MatChipInputEvent, MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ListContainersService } from '../containers/list/list.service';
@@ -47,12 +47,13 @@ import { DockstoreTool } from './../shared/swagger/model/dockstoreTool';
 import { PublishRequest } from './../shared/swagger/model/publishRequest';
 import { UrlResolverService } from './../shared/url-resolver.service';
 import { EmailService } from './email.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-container',
   templateUrl: './container.component.html',
 })
-export class ContainerComponent extends Entry {
+export class ContainerComponent extends Entry implements AfterViewInit {
   dockerPullCmd: string;
   privateOnlyRegistry: boolean;
   containerEditData: any;
@@ -91,9 +92,9 @@ export class ContainerComponent extends Entry {
     activatedRoute: ActivatedRoute, protected sessionService: SessionService, protected sessionQuery: SessionQuery,
     protected gA4GHFilesService: GA4GHFilesService, private toolQuery: ToolQuery, private alertService: AlertService,
     private extendedDockstoreToolQuery: ExtendedDockstoreToolQuery, private alertQuery: AlertQuery, public dialog: MatDialog,
-    private toolService: ToolService) {
+    private toolService: ToolService, titleService: Title) {
     super(trackLoginService, providerService, router, dateService, urlResolverService, activatedRoute,
-      location, sessionService, sessionQuery, gA4GHFilesService);
+      location, sessionService, sessionQuery, gA4GHFilesService, titleService);
     this.isRefreshing$ = this.alertQuery.showInfo$;
     this.extendedTool$ = this.extendedDockstoreToolQuery.extendedDockstoreTool$;
 
@@ -144,6 +145,7 @@ export class ContainerComponent extends Entry {
       tool => {
         this.tool = tool;
         if (tool) {
+          this.titleService.setTitle(this.tool.tool_path);
           this.published = this.tool.is_published;
           this.setPublishMessage();
           if (this.tool.tags.length === 0) {
@@ -162,6 +164,32 @@ export class ContainerComponent extends Entry {
       }
     );
   }
+
+  // Embed Discourse comments into page
+  ngAfterViewInit() {
+    if (this.publicPage) {
+      this.toolQuery.tool$.pipe(takeUntil(this.ngUnsubscribe)).subscribe(
+        tool => {
+          if (tool && !this.addedDiscourse) {
+            this.addedDiscourse = true;
+            this.titleService.setTitle(tool.tool_path);
+            (function() {
+              const d = document.createElement('script'); d.type = 'text/javascript'; d.async = true;
+              d.src = (<any>window).DiscourseEmbed.discourseUrl + 'javascripts/embed.js';
+              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(d);
+            })();
+          }
+      });
+    }
+
+    this.activatedRoute.queryParams.pipe(takeUntil(this.ngUnsubscribe)).subscribe((params: Params) => {
+      const tabIndex = this.validTabs.indexOf(params['tab']);
+      if (tabIndex > -1) {
+        this.currentTab = this.validTabs[tabIndex];
+      }
+    });
+  }
+
 
   protected setUpTool(tool: ExtendedDockstoreTool) {
     if (tool) {
