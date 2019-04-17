@@ -29,21 +29,7 @@ jobs:
         - npx ng test --watch=false --code-coverage --browsers ChromeHeadless
         - npm install --no-save codecov
     - stage: integration test
-      name: "Cypress Group 1"
-      env:
-        - TEST='cypress/integration/group1/**/*'
-      script:
-        - ./scripts/run-travis-script.sh
-    - stage: integration test
-      name: "Cypress Group 2"
-      env:
-        - TEST='cypress/integration/group2/**/*'
-      script:
-        - ./scripts/run-travis-script.sh
-    - stage: integration test
-      name: "Cypress Group 3"
-      env:
-        - TEST='cypress/integration/group3/**/*'
+      name: "Parallel Cypress Tests"
       script:
         - ./scripts/run-travis-script.sh
 
