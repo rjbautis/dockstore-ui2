@@ -21,7 +21,7 @@ describe('Dockstore Organizations', () => {
 
   function typeInInput(fieldName: string, text: string) {
     cy.contains(fieldName).parentsUntil('.mat-form-field-wrapper')
-      .find('input').first().clear().type(text);
+      .find('input').first().should('be.visible').clear().type(text);
   }
 
   function clearInput(fieldName: string) {
@@ -77,7 +77,7 @@ describe('Dockstore Organizations', () => {
       cy.contains('Basement');
       cy.contains('asdf@asdf.ca');
       cy.contains('No collections found');
-      cy.get('.img-circle').should('have.attr', 'src').should('include', '../../../assets/images/dockstore/PlaceholderLC.png');
+      cy.get('.orgLogo').should('have.attr', 'src').should('include', '../../../assets/images/dockstore/PlaceholderLC.png');
     });
     it('be able to edit organization', () => {
       cy.get('#editOrgInfo').should('be.visible').click();
@@ -105,7 +105,7 @@ describe('Dockstore Organizations', () => {
       cy.contains('https://www.google.com');
       cy.contains('UCSC Basement');
       cy.contains('asdf@asdf.com');
-      cy.get('.img-circle').should('have.attr', 'src').should('include', 'https://www.gravatar.com/avatar/000?d=https://res.cloudinary.com/hellofresh/image/upload/f_auto,fl_lossy,q_auto,w_640/v1/hellofresh_s3/image/554a3abff8b25e1d268b456d.png');
+      cy.get('.orgLogo').should('have.attr', 'src').should('include', 'https://www.gravatar.com/avatar/000?d=https://res.cloudinary.com/hellofresh/image/upload/f_auto,fl_lossy,q_auto,w_640/v1/hellofresh_s3/image/554a3abff8b25e1d268b456d.png');
     });
   });
 
@@ -151,6 +151,19 @@ describe('Dockstore Organizations', () => {
   });
 
   describe('should be able to view a collection', () => {
+    beforeEach(() => {
+      const memberships = [
+        {id: 1, role: 'MAINTAINER', accepted: true, organization: { id: 1, status: 'APPROVED', name: 'Potatoe', displayName: 'Potatoe'}},
+      ];
+      cy
+        .server()
+        .route({
+          method: 'GET',
+          url: '/users/user/memberships',
+          response: memberships
+      });
+    });
+
     it('be able to see collection information', () => {
       cy.visit('/organizations/Potatoe/collections/veryFakeCollectionName');
       cy.contains('veryFakeCollectionName').click();
