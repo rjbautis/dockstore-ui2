@@ -33,6 +33,16 @@ jobs:
       script:
         - ./scripts/run-travis-script.sh
 
+    - stage: integration test
+      name: "Parallel Cypress Tests"
+      script:
+        - ./scripts/run-travis-script.sh
+
+    - stage: integration test
+      name: "Parallel Cypress Tests"
+      script:
+        - ./scripts/run-travis-script.sh
+
 script: echo "overriding test"
 
 after_success:
