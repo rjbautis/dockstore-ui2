@@ -13,11 +13,10 @@
  *     See the License for the specific language governing permissions and
  *     limitations under the License.
  */
-import { resetDB, setTokenUserViewPort, setTokenUserViewPortCurator } from '../../support/commands';
+import { resetDB, setTokenUserViewPortCurator } from '../../support/commands';
 
 describe('Tool, Workflow, and Organization starring', () => {
   resetDB();
-  // setTokenUserViewPort();
   setTokenUserViewPortCurator();
 
   function typeInInput(fieldName: string, text: string) {
@@ -157,7 +156,7 @@ describe('Tool, Workflow, and Organization starring', () => {
 
       starringUnapprovedOrg('organization/Potato');
 
-      //Approve org
+      // Approve org
       cy.visit('/accounts');
       cy
         .get('.mat-tab-label-content')
