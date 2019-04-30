@@ -1,10 +1,10 @@
 sudo: required
 dist: trusty
-language: node_js
+language: java
 services:
   - postgresql
 jdk:
-  - oraclejdk11
+  - openjdk11
 cache:
   npm: true # this caches ~/.npm folder on Travis
   directories:
@@ -14,6 +14,9 @@ addons:
   firefox: "latest"
   postgresql: "9.6"
   chrome: stable
+
+before_install:
+  - nvm install 10.13.0
 
 install:
   - npm ci
