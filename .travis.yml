@@ -4,7 +4,7 @@ language: node_js
 services:
   - postgresql
 jdk:
-  - openjdk11
+  - oraclejdk11
 cache:
   npm: true # this caches ~/.npm folder on Travis
   directories:
