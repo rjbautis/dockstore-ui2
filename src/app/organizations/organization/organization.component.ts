@@ -34,7 +34,6 @@ import { UserQuery } from '../../shared/user/user.query';
   styleUrls: ['./organization.component.scss']
 })
 export class OrganizationComponent implements OnInit {
-  organization: Organization;
   public organizationStarGazersClicked = false;
 
   organization$: Observable<Organization>;
@@ -43,6 +42,7 @@ export class OrganizationComponent implements OnInit {
   isAdmin$: Observable<boolean>;
   isCurator$: Observable<boolean>;
   gravatarUrl$: Observable<string>;
+  approved = Organization.StatusEnum.APPROVED;
 
   constructor(private organizationQuery: OrganizationQuery, private organizationService: OrganizationService, private matDialog: MatDialog,
     private activatedRoute: ActivatedRoute, private userQuery: UserQuery
