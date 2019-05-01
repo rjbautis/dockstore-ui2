@@ -16,7 +16,7 @@ googleRedirectURI: http://localhost:8080/auth/tokens/google.com
 authorizerType: inmemory
 
 externalConfig:
-  basePath: /
+  basePath: /api/
   hostname: localhost
   scheme: http
   port: 8080
